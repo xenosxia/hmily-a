@@ -1,8 +1,16 @@
 package org.dromara.hmily.core.context;
 
-import java.util.Map;
-
+/**
+ * 清除上下文参数.
+ *
+ * @author xenosxia
+ */
 @FunctionalInterface
 public interface HmilyInvocationContextParamClear {
-  Boolean clearContextParam();
+    /**
+     * 清除前面设置的参数.
+     *
+     * @return boolean
+     */
+    Boolean clearContextParam();
 }

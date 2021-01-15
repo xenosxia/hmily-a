@@ -17,24 +17,22 @@
 
 package org.dromara.hmily.repository.spi.entity;
 
-import java.io.Serializable;
-import java.util.Map;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.Map;
 
 
 /**
  * HmilyInvocation.
  *
- * @author xiaoyu
+ * @author xenosxia
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class HmilyInvocationWithContext extends  HmilyInvocation{
+public class HmilyInvocationWithContext extends HmilyInvocation {
     private static final long serialVersionUID = -5208578223428529356L;
 
     private Class<?> targetClass;

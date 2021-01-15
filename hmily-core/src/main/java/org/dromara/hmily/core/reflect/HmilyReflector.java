@@ -18,18 +18,22 @@
 
 package org.dromara.hmily.core.reflect;
 
-import java.util.Map;
-import java.util.Objects;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.dromara.hmily.common.enums.ExecutorTypeEnum;
 import org.dromara.hmily.common.enums.HmilyActionEnum;
 import org.dromara.hmily.common.enums.HmilyRoleEnum;
-import org.dromara.hmily.core.context.*;
+import org.dromara.hmily.core.context.HmilyContextHolder;
+import org.dromara.hmily.core.context.HmilyInvocationContextParamClear;
+import org.dromara.hmily.core.context.HmilyInvocationContextParamSet;
+import org.dromara.hmily.core.context.HmilyTransactionContext;
 import org.dromara.hmily.core.holder.SingletonHolder;
 import org.dromara.hmily.core.provide.ObjectProvide;
 import org.dromara.hmily.repository.spi.entity.HmilyInvocation;
 import org.dromara.hmily.repository.spi.entity.HmilyInvocationWithContext;
 import org.dromara.hmily.repository.spi.entity.HmilyParticipant;
+
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * The type Hmily reflector.
@@ -37,24 +41,25 @@ import org.dromara.hmily.repository.spi.entity.HmilyParticipant;
  * @author xiaoyu(Myth)
  */
 public class HmilyReflector {
-
     /**
-     * 获取上下文参数并设置
+     * 获取上下文参数并设置.
+     *
+     * @param hmilyParticipant hmilyParticipant
+     * @return boolean
      */
-    private static boolean setContextParams(final HmilyParticipant hmilyParticipant){
+    private static boolean setContextParams(final HmilyParticipant hmilyParticipant) {
         boolean result = false;
 
-        final HmilyInvocationContextParamSet hmilyInvocationContextParamSet =
-                (HmilyInvocationContextParamSet)SingletonHolder.INST.get(ObjectProvide.class)
-                        .provide(HmilyInvocationContextParamSet.class);
-        if(null == hmilyInvocationContextParamSet){
+        final HmilyInvocationContextParamSet hmilyInvocationContextParamSet = (HmilyInvocationContextParamSet) SingletonHolder.INST
+            .get(ObjectProvide.class).provide(HmilyInvocationContextParamSet.class);
+        if (null == hmilyInvocationContextParamSet) {
             return false;
         }
 
-        HmilyInvocationWithContext hmilyInvocationWithContext =
-                (HmilyInvocationWithContext)hmilyParticipant.getConfirmHmilyInvocation();
-        if(null == hmilyInvocationWithContext){
-            hmilyInvocationWithContext = (HmilyInvocationWithContext)hmilyParticipant.getCancelHmilyInvocation();
+        HmilyInvocationWithContext hmilyInvocationWithContext = (HmilyInvocationWithContext) hmilyParticipant
+            .getConfirmHmilyInvocation();
+        if (null == hmilyInvocationWithContext) {
+            hmilyInvocationWithContext = (HmilyInvocationWithContext) hmilyParticipant.getCancelHmilyInvocation();
         }
 
         Map<String, Object> contextParams = hmilyInvocationWithContext.getContextParams();
@@ -65,15 +70,15 @@ public class HmilyReflector {
     }
 
     /**
-     * 清理上下文参数
-     * 
+     * 清理上下文参数.
+     *
+     * @param flag set:1 unset:0
      */
-    private static void clearContextParams(Boolean flag){
-        if(flag){
-            final HmilyInvocationContextParamClear hmilyInvocationContextParamClear =
-                    (HmilyInvocationContextParamClear)SingletonHolder.INST.get(ObjectProvide.class)
-                            .provide(HmilyInvocationContextParamClear.class);
-            if(hmilyInvocationContextParamClear != null) {
+    private static void clearContextParams(final Boolean flag) {
+        if (flag) {
+            final HmilyInvocationContextParamClear hmilyInvocationContextParamClear = (HmilyInvocationContextParamClear)
+                    SingletonHolder.INST.get(ObjectProvide.class).provide(HmilyInvocationContextParamClear.class);
+            if (hmilyInvocationContextParamClear != null) {
                 hmilyInvocationContextParamClear.clearContextParam();
             }
         }
@@ -109,7 +114,7 @@ public class HmilyReflector {
                     return executeLocal(hmilyParticipant.getCancelHmilyInvocation(), hmilyParticipant.getTargetClass(), hmilyParticipant.getCancelMethod());
                 }
             }
-        }finally {
+        } finally {
             clearContextParams(isFillContextParam);
         }
     }

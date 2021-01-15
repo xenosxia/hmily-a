@@ -18,9 +18,6 @@
 package org.dromara.hmily.tcc.executor;
 
 import com.google.common.collect.Lists;
-import java.lang.reflect.Method;
-import java.util.*;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.dromara.hmily.annotation.HmilyTCC;
@@ -48,6 +45,13 @@ import org.dromara.hmily.repository.spi.entity.HmilyParticipant;
 import org.dromara.hmily.repository.spi.entity.HmilyTransaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * this is hmily transaction manager.
@@ -167,6 +171,11 @@ public final class HmilyTccTransactionExecutor {
     public Object participantConfirm(final List<HmilyParticipant> hmilyParticipantList, final Long selfParticipantId) {
         if (CollectionUtils.isEmpty(hmilyParticipantList)) {
             return null;
+        }
+        HmilyParticipant selfHmilyParticipant = filterSelfHmilyParticipant(hmilyParticipantList);
+        if (Objects.nonNull(selfHmilyParticipant)) {
+            selfHmilyParticipant.setStatus(HmilyActionEnum.CONFIRMING.getCode());
+            HmilyRepositoryStorage.updateHmilyParticipantStatus(selfHmilyParticipant);
         }
         List<Object> results = Lists.newArrayListWithCapacity(hmilyParticipantList.size());
         for (HmilyParticipant hmilyParticipant : hmilyParticipantList) {
@@ -294,7 +303,7 @@ public final class HmilyTccTransactionExecutor {
     
     private HmilyParticipant filterSelfHmilyParticipant(final List<HmilyParticipant> hmilyParticipantList) {
         if (CollectionUtils.isNotEmpty(hmilyParticipantList)) {
-            return hmilyParticipantList.stream().filter(e -> e.getParticipantRefId() != null).findFirst().orElse(null);
+            return hmilyParticipantList.stream().filter(e -> e.getParticipantRefId() == null).findFirst().orElse(null);
         }
         return null;
     }
@@ -339,28 +348,28 @@ public final class HmilyTccTransactionExecutor {
 
         if (StringUtils.isNoneBlank(confirmMethodName)) {
             hmilyParticipant.setConfirmMethod(confirmMethodName);
-            HmilyInvocation confirmInvocation =
-                    new HmilyInvocationWithContext(clazz.getInterfaces()[0], method.getName(), method.getParameterTypes(), args,contextParams);
+            HmilyInvocation confirmInvocation = new HmilyInvocationWithContext(clazz.getInterfaces()[0], method.getName(),
+                  method.getParameterTypes(), args, contextParams);
 
             hmilyParticipant.setConfirmHmilyInvocation(confirmInvocation);
         }
         if (StringUtils.isNoneBlank(cancelMethodName)) {
             hmilyParticipant.setCancelMethod(cancelMethodName);
-            HmilyInvocation cancelInvocation =
-                    new HmilyInvocationWithContext(clazz.getInterfaces()[0], method.getName(), method.getParameterTypes(), args,contextParams);
+            HmilyInvocation cancelInvocation = new HmilyInvocationWithContext(clazz.getInterfaces()[0], method.getName(),
+                  method.getParameterTypes(), args, contextParams);
 
             hmilyParticipant.setCancelHmilyInvocation(cancelInvocation);
         }
         return hmilyParticipant;
     }
 
-    private Map<String, Object> getContextParams(){
+    private Map<String, Object> getContextParams() {
         Map<String, Object> contextParams;
         HmilyInvocationContextParamLookUp hmilyInvocationContextParamLookUp = (HmilyInvocationContextParamLookUp) SingletonHolder.INST
-                .get(ObjectProvide.class).provide(HmilyInvocationContextParamLookUp.class);
-        if(hmilyInvocationContextParamLookUp != null){
+            .get(ObjectProvide.class).provide(HmilyInvocationContextParamLookUp.class);
+        if (hmilyInvocationContextParamLookUp != null) {
             contextParams = hmilyInvocationContextParamLookUp.getContextParams();
-        }else{
+        } else {
             contextParams = new HashMap<>();
         }
         return contextParams;

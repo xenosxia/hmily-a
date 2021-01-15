@@ -17,18 +17,11 @@
 
 package org.dromara.hmily.springcloud.feign;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import org.dromara.hmily.annotation.Hmily;
 import org.dromara.hmily.common.enums.HmilyActionEnum;
 import org.dromara.hmily.common.enums.HmilyRoleEnum;
 import org.dromara.hmily.common.utils.IdWorkerUtils;
 import org.dromara.hmily.core.context.HmilyContextHolder;
-import org.dromara.hmily.core.context.HmilyInvocationContextParamClear;
 import org.dromara.hmily.core.context.HmilyInvocationContextParamLookUp;
 import org.dromara.hmily.core.context.HmilyTransactionContext;
 import org.dromara.hmily.core.holder.HmilyTransactionHolder;
@@ -39,6 +32,13 @@ import org.dromara.hmily.repository.spi.entity.HmilyInvocationWithContext;
 import org.dromara.hmily.repository.spi.entity.HmilyParticipant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * HmilyFeignHandler.
@@ -95,7 +95,8 @@ public class HmilyFeignHandler implements InvocationHandler {
         hmilyParticipant.setTransType(context.getTransType());
         final Class<?> declaringClass = method.getDeclaringClass();
         Map<String, Object> contextParams = getContextParams();
-        HmilyInvocation hmilyInvocation = new HmilyInvocationWithContext(declaringClass, method.getName(), method.getParameterTypes(), args,contextParams);
+        HmilyInvocation hmilyInvocation = new HmilyInvocationWithContext(declaringClass, method.getName(),
+            method.getParameterTypes(), args, contextParams);
         hmilyParticipant.setConfirmHmilyInvocation(hmilyInvocation);
         hmilyParticipant.setCancelHmilyInvocation(hmilyInvocation);
         return hmilyParticipant;
@@ -105,14 +106,13 @@ public class HmilyFeignHandler implements InvocationHandler {
         this.delegate = delegate;
     }
 
-    private Map<String, Object> getContextParams(){
+    private Map<String, Object> getContextParams() {
         Map<String, Object> contextParams;
-        final HmilyInvocationContextParamLookUp hmilyInvocationContextParamLookUp =
-                (HmilyInvocationContextParamLookUp) SingletonHolder.INST.get(ObjectProvide.class)
-                        .provide(HmilyInvocationContextParamLookUp.class);
-        if(hmilyInvocationContextParamLookUp != null){
+        final HmilyInvocationContextParamLookUp hmilyInvocationContextParamLookUp = (HmilyInvocationContextParamLookUp) SingletonHolder.INST
+            .get(ObjectProvide.class).provide(HmilyInvocationContextParamLookUp.class);
+        if (hmilyInvocationContextParamLookUp != null) {
             contextParams = hmilyInvocationContextParamLookUp.getContextParams();
-        }else{
+        } else {
             contextParams = new HashMap<>();
         }
         return contextParams;
